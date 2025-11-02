@@ -1,0 +1,125 @@
+/*
+ * This is a simple program to figure out an employee's weekly pay.
+ *
+ * It asks for the hours worked and their hourly rate,
+ * then calculates the total pay. It also handles overtime
+ * (1.5x pay) for any hours over 40.
+ */
+
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+/*
+ * This class holds all the info for a single employee.
+ * It keeps track of their name, pay rate, and has the
+ * logic to calculate their salary.
+ */
+class Employee {
+private:
+    string name;
+    double hourlyRate;
+
+    // These are the "business rules" for payroll
+    const double OVERTIME_THRESHOLD = 40.0; // Overtime kicks in after 40 hours
+    const double OVERTIME_MULTIPLIER = 1.5; // Overtime pay is 1.5x the normal rate
+
+public:
+    
+    Employee(string empName, double rate) : name(empName), hourlyRate(rate) {}
+
+    /*
+     * This function does the main calculation.
+     * Give it the number of hours worked, and it returns
+     * the total salary (regular pay + any overtime).
+     */
+    double calculateSalary(double hoursWorked) {
+        double regularPay = 0.0;
+        double overtimePay = 0.0;
+
+        // If they didn't work, they don't get paid.
+        if (hoursWorked <= 0) {
+            return 0.0;
+        }
+
+        // Check if they worked overtime
+        if (hoursWorked > OVERTIME_THRESHOLD) {
+            // First, calculate the pay for the regular 40 hours
+            regularPay = OVERTIME_THRESHOLD * hourlyRate;
+            
+            // Next, figure out how many overtime hours they worked
+            double overtimeHours = hoursWorked - OVERTIME_THRESHOLD;
+            
+            // Calculate the pay for just the overtime hours
+            overtimePay = overtimeHours * hourlyRate * OVERTIME_MULTIPLIER;
+        } else {
+            // No overtime
+            regularPay = hoursWorked * hourlyRate;
+        }
+
+        // Add the regular pay and overtime pay together
+        return regularPay + overtimePay;
+    }
+
+    // A simple function to get the employee's name
+    string getName() const {
+        return name;
+    }
+};
+
+/*
+ * A helper function to fix the keyboard buffer.
+ * If a user types "abc" when we expect a number, `cin` breaks.
+ * This function clears out the bad input so the program
+ * doesn't get stuck in an infinite loop.
+ */
+void clearInputBuffer() {
+    // It reads and throws away characters one by one
+    // until it hits the "Enter" key (newline).
+    char c;
+    while ((c = cin.get()) != '\n' && c != EOF);
+}
+
+/*
+ * This is where the program starts.
+ *
+ * It creates an employee, asks the user for their hours,
+ * and then prints out the final salary.
+ */
+int main() {
+    cout << "===== Employee Payroll System =====" << endl;
+
+    // We could change this to ask the user for the name and rate
+    string empName = "Jane Doe";
+    double rate = 25.50; // $25.50 per hour
+    Employee emp1(empName, rate);
+
+    cout << "Calculating salary for: " << emp1.getName() << endl;
+    cout << "Hourly Rate: $" << rate << endl;
+    cout << "Overtime rate (over 40 hrs): 1.5x" << endl;
+    cout << "-----------------------------------" << endl;
+
+    double hours;
+    cout << "Enter total hours worked this week: ";
+
+    // This loop keeps asking until the user gives a valid number.
+    // It checks if the input is not a number OR if it's negative.
+    while (!(cin >> hours) || hours < 0) {
+        cout << "Invalid input. Please enter a positive number: ";
+        cin.clear(); // Resets the "error" flag on cin
+        clearInputBuffer(); // Clears out the bad text (like "abc")
+    }
+
+    double totalSalary = emp1.calculateSalary(hours);
+
+    cout.precision(2); 
+
+    cout << "\n--- Payroll Summary ---" << endl;
+    cout << "Employee: " << emp1.getName() << endl;
+    cout << "Hours Worked: " << hours << endl;
+    cout << "Total Salary: $" << fixed << totalSalary << endl;
+    cout << "=======================" << endl;
+
+    return 0;
+}
